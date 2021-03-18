@@ -13,23 +13,35 @@ jobs:
         id: set_env_vars
         shell: pwsh
         run: |
-          $env:APP_VERSION = git describe --tags --always --first-parent --abbrev=4 --long
-          #git describe --tags --always --first-parent
+          $env:APP_VERSION = git describe --tags --always --first-parent --abbrev=0
+          $env:APP_VERSION_LONG = git describe --tags --always --first-parent --abbrev=4 --long
 
           if ( $env:APP_VERSION[0] -eq 'v' ) {
+              # remove leading "v" from version if there's any
               $env:APP_VERSION = $env:APP_VERSION.substring(1)
           }
-          echo "$$env:APP_VERSION env var not set. Setting to default: $env:APP_VERSION"
 
-          echo "::set-output name=AppVersionEnv::$env:APP_VERSION"
+          if ( $env:APP_VERSION_LONG[0] -eq 'v' ) {
+              # remove leading "v" from version if there's any
+              $env:APP_VERSION_LONG = $env:APP_VERSION_LONG.substring(1)
+          }
+
+          echo "Setting $$env:APP_VERSION to: $env:APP_VERSION"
+          echo "Setting $$env:APP_VERSION_LONG to: $env:APP_VERSION_LONG"
+
+          # exposes vars to github action output
+          echo "::set-output name=AppVersion::$env:APP_VERSION"
+          echo "::set-output name=AppVersionLong::$env:APP_VERSION_LONG"
+
     outputs:
-      AppVersionEnv: ${{ steps.set_env_vars.outputs.AppVersionEnv }}
+      AppVersion: ${{ steps.set_env_vars.outputs.AppVersion }}
+      AppVersionLong: ${{ steps.set_env_vars.outputs.AppVersionLong }}
 
   build_frontend:
     runs-on: ubuntu-latest
     needs: [get_app_version]
     env:
-      APP_VERSION: ${{ needs.get_app_version.outputs.AppVersionEnv }}
+      APP_VERSION: ${{ needs.get_app_version.outputs.AppVersion }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -41,7 +53,8 @@ jobs:
       - name: echo
         run: |
           ls
-          echo $APP_VERSION
+          echo "$$env:APP_VERSION is: $env:APP_VERSION"
+          echo "$$env:APP_VERSION_LONG is: $env:APP_VERSION_LONG"
 
       - name: run python
         run: |
