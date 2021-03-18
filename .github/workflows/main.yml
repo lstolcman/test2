@@ -53,8 +53,8 @@ jobs:
       - name: echo
         run: |
           ls
-          echo "$$env:APP_VERSION is: $env:APP_VERSION"
-          echo "$$env:APP_VERSION_LONG is: $env:APP_VERSION_LONG"
+          echo "$$APP_VERSION is: $APP_VERSION"
+          echo "$$APP_VERSION_LONG is: $APP_VERSION_LONG"
 
       - name: run python
         run: |
