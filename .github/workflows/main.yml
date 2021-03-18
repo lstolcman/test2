@@ -1,10 +1,5 @@
-name: test
-
-
-on:
-  push:
-    branches:
-      - master
+name: test33
+on: push
 
 jobs:
   get_app_version:
