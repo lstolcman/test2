@@ -13,9 +13,8 @@ jobs:
         id: set_env_vars
         shell: pwsh
         run: |
-
-
-          $env:APP_VERSION = git describe --tags --always --first-parent
+          $env:APP_VERSION = git describe --tags --always --first-parent --abbrev=4 --long
+          #git describe --tags --always --first-parent
 
           if ( $env:APP_VERSION[0] -eq 'v' ) {
               $env:APP_VERSION = $env:APP_VERSION.substring(1)
@@ -23,7 +22,6 @@ jobs:
           echo "$$env:APP_VERSION env var not set. Setting to default: $env:APP_VERSION"
 
           echo "::set-output name=AppVersionEnv::$env:APP_VERSION"
-
     outputs:
       AppVersionEnv: ${{ steps.set_env_vars.outputs.AppVersionEnv }}
 
@@ -33,21 +31,18 @@ jobs:
     env:
       APP_VERSION: ${{ needs.get_app_version.outputs.AppVersionEnv }}
     steps:
-
       - name: Checkout repo
         uses: actions/checkout@v2
-
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'
-      
+
       - name: echo
         run: |
           ls
           echo $APP_VERSION
 
-      
       - name: run python
         run: |
           python test.py
