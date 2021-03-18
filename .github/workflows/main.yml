@@ -42,6 +42,7 @@ jobs:
     needs: [get_app_version]
     env:
       APP_VERSION: ${{ needs.get_app_version.outputs.AppVersion }}
+      APP_VERSION_LONG: ${{ needs.get_app_version.outputs.AppVersionLong }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
