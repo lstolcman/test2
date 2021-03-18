@@ -19,11 +19,10 @@ jobs:
         shell: pwsh
         run: |
 
-          # os.getenv('APP_VERSION') used by django to serve app version in endpoint
+
           $env:APP_VERSION = git describe --tags --always --first-parent
 
           if ( $env:APP_VERSION[0] -eq 'v' ) {
-              # remove leading "v" from version if there's any - breaks .exe version details in windows
               $env:APP_VERSION = $env:APP_VERSION.substring(1)
           }
           echo "$$env:APP_VERSION env var not set. Setting to default: $env:APP_VERSION"
