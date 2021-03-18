@@ -1,0 +1,59 @@
+name: test
+
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  get_app_version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set env vars
+        id: set_env_vars
+        shell: pwsh
+        run: |
+
+          # os.getenv('APP_VERSION') used by django to serve app version in endpoint
+          $env:APP_VERSION = git describe --tags --always --first-parent
+
+          if ( $env:APP_VERSION[0] -eq 'v' ) {
+              # remove leading "v" from version if there's any - breaks .exe version details in windows
+              $env:APP_VERSION = $env:APP_VERSION.substring(1)
+          }
+          echo "$$env:APP_VERSION env var not set. Setting to default: $env:APP_VERSION"
+
+          echo "::set-output name=AppVersionEnv::$env:APP_VERSION"
+
+    outputs:
+      AppVersionEnv: ${{ steps.set_env_vars.outputs.AppVersionEnv }}
+
+  build_frontend:
+    runs-on: ubuntu-latest
+    needs: [get_app_version]
+    env:
+      APP_VERSION: ${{ needs.get_app_version.outputs.AppVersionEnv }}
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+          uses: actions/setup-python@v2
+          with:
+            python-version: 3.8
+      
+      - name: echo
+        run: |
+          ls
+          echo $APP_VERSION
+
+      
+      - name: run python
+        run: |
+          python test.py
